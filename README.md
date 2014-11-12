@@ -1,5 +1,5 @@
-# COMPOST: A bash deployment script with composer installation (or other system)
-This is a ridiculous simple script that will download the source code of your project from a git repository and deploy it in production resolving all its dependencies (using **composer** by default). The script is written in `bash` so you don't have to install anything in the server other than the tools you already use. 
+# COMPOST: A bash deployment script with Composer installation
+This is a ridiculous simple script that will download the source code of your project from a git repository and deploy it in production resolving all its dependencies (using **composer** by default, but you can change the command to bower or anything else). The script is written in `bash` so you don't have to install anything in the server other than the tools you already use. 
 
 **DISCLAIMER: Very beta! Use with caution, I won't refund you the money if things go weird. I take no responsibility or whatsoever. Developed in one late afterwork night. My skills in Bash are so advanced as the ones of a Spanish prime minister related to rule a country. All being said, enjoy the masterpiece.**
 
@@ -101,13 +101,6 @@ If you don't make any changes to this script, the deployment of the [SIFO.me](ht
 	HEAD is now at fa93835... Minor update on documentation
 	
 	Deployment finished! Using /var/www/releases/fa938355be as production folder
-After deploying the folder structure looks like this:
-
-	$ ls -l /var/www/
-	total 8
-	drwxr-xr-x  2 alombarte  staff   68 Nov 12 00:31 deploys
-	lrwxr-xr-x  1 alombarte  staff   45 Nov 12 01:08 production -> /Users/artomb/deploy_test/releases/fa938355be
-	drwxr-xr-x  5 alombarte  staff  170 Nov 12 01:08 releases
 
 
 ## How does it work?
@@ -117,16 +110,21 @@ If a release has been already deployed in the past if you intend to deploy it ag
 
 A more graphical example, let's imagine you have you installed your application (`APP_DIR`) under:
 
-	/var/www/myapplication
+	/var/www/myapp
 	
 And then you want to deploy your code to the latest revision in the current branch, then you would execute:
 
-	/path/to/deploy.sh
+	bash deploy.sh
 	
-At this moment the script will create a new release folder and point the `myapplication` there:
+At this moment the script will create a new release folder and point the `myapp` there:
 	
 	$ ls -l /var/www
-	lrwxr-xr-x  ...     myapplication -> /var/www/releases/0e92998cc7
+	total 8
+	drwxr-xr-x  2 alombarte  staff   68 Nov 12 00:31 deploys
+	lrwxr-xr-x  1 alombarte  staff   45 Nov 12 01:08 myapp -> /var/www/releases/fa938355be
+	drwxr-xr-x  5 alombarte  staff  170 Nov 12 01:08 releases
+
+
  
 
 ### Preparation of the release
