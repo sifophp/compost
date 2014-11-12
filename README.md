@@ -13,7 +13,9 @@ This is a ridiculous simple script that will download the source code of your pr
 ## Installation
  - Download this source code into your production server.
  - Edit the `deploy.cfg` with your project settings
- - Clone the project and create a symlink in the APP_DIR. Or copy paste:
+ - Clone the project and create a symlink in the APP_DIR: 
+
+Copy and paste with the final `deploy.cfg`:
 
 	source deploy.cfg
 	git clone $GIT_REPO $RELEASES_SKELETON_DIR
