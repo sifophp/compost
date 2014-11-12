@@ -1,33 +1,41 @@
 #!/bin/bash
 # Deploy script for applications based on composer.
 
+
+# Store where this script is stored, no matter where you invoke it from:
+SCRIPTPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# and load the configuration:
+source $SCRIPTPATH/deploy.cfg
+
 TODAY=$(date "+%Y-%b-%d")
-TIME=$(date "+%k:%M")
 ORIGINAL_PATH=$PWD
 DEPLOY_LOG="$DEPLOY_LOGS_DIR/$TODAY.log"
 
-source ./deploy.cfg
-
+# REQUISITES CHECKING
+# -------------------
 command -v $DEPENDENCY_BIN >/dev/null 2>&1 || { echo >&2 "Command '$DEPENDENCY_BIN' is not installed. Failed miserably :_("; exit 1; }
 
-
-# SETUP
-# Create all necessary dirs (if they exist nothing will happen):
+# Create all dirs
 mkdir -p "$APP_DIR"
 mkdir -p "$RELEASES_DIR"
 mkdir -p "$RELEASES_SKELETON_DIR"
 mkdir -p "$DEPLOY_LOGS_DIR"
 
 # First-time only. Clone the whole thing and composer update.
-if [ ! -f $RELEASES_SKELETON_DIR/.git ]; then
+if [ ! -d $RELEASES_SKELETON_DIR/.git ]; then
 	git clone $GIT_REPO $RELEASES_SKELETON_DIR
 	cd $RELEASES_SKELETON_DIR
 	$DEPENDENCY_BIN install	
 fi
 
-# CURRENT STATUS
+# DEPLOYMENT START
+# ----------------
+
+
+# CURRENT APP STATUS
 cd $APP_DIR
 APP_BRANCH=$(git branch | awk '/^\*/ { print $2 }')
+# REMOTE STATUS
 APP_BASE_DIR_REMOTE_REV=`git ls-remote origin $APP_BRANCH | sed 's/\([0-9a-f]\{10\}\)\(.*\)/\1/g' | head -n 1`
 APP_BASE_DIR_LOCAL_REV=`git rev-parse refs/heads/$APP_BRANCH | sed 's/\([0-9a-f]\{10\}\)\(.*\)/\1/g'`
 
@@ -75,6 +83,6 @@ fi
 rm $APP_DIR && ln -s $RELEASE $APP_DIR
 
 # Execute post-deployment actions
-source post-deploy.sh
+source $SCRIPTPATH/post-deploy.sh
 	
 cd $ORIGINAL_PATH

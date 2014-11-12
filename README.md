@@ -1,19 +1,28 @@
-# Composer bash deploy
-This is a ridiculous simple script that will download the source code of your project from a git repository and deploy it in production resolving all its composer dependencies. The script is written in `bash` so you don't have to install anything in the server other than the tools you already use (`composer` and `git`). 
+# COMPOST: A bash deployment script with composer installation (or other system)
+This is a ridiculous simple script that will download the source code of your project from a git repository and deploy it in production resolving all its dependencies (using **composer** by default). The script is written in `bash` so you don't have to install anything in the server other than the tools you already use. 
 
-**DISCALIMER: Very beta! Use with caution, I won't refund you the money if things go weird. I take no responsibility or whatsoever. This is a one *noche loca* project**
+**DISCLAIMER: Very beta! Use with caution, I won't refund you the money if things go weird. I take no responsibility or whatsoever. Developed in one late afterwork night. My skills in Bash are so advanced as the ones of a Spanish prime minister related to rule a country. All being said, enjoy the masterpiece.**
 
 
 ## Requirements
  - Linux, BSD, Mac or alike with a bash terminal 
  - `git` command installed
- - `composer` installed
+ - `composer` installed, or any other dependency system you choose.
+ - A remotely cloned git repo where the production path points to.
 
 ## Installation
  - Download this source code into your production server.
  - Edit the `deploy.cfg` with your project settings
+ - Clone the project and create a symlink in the APP_DIR. Or copy paste:
 
-If you don't have composer install it using:
+	source deploy.cfg
+	git clone $GIT_REPO $RELEASES_SKELETON_DIR
+	ln -s $RELEASES_SKELETON_DIR $APP_DIR
+	
+You should not serve in production this folder yet, since is pointing to the "skeleton" and that's only a temporary state until you deploy for the first time.
+
+### Dependency management
+If you don't have composer or similar installed, now is the moment. Composer works like this:
 
 	# See: https://getcomposer.org/
 	curl -sS https://getcomposer.org/installer | php
@@ -38,10 +47,64 @@ If you need to do specific things **after** the deploy then put them in the file
 *NOTE:* Depending on the needed permissions you might need to run the script using `sudo`:
 
 	sudo bash deploy.sh
+
+To run the script in debug mode and see every line what is doing type:
+
+	bash -x deploy.sh
 	
-If you don't make any changes to this script, the deployment of the [SIFO.me](http://sifo.me) website will be done in the folder /var/www/production. You can test it as reference. The output looks like this:
+If you don't make any changes to this script, the deployment of the [SIFO.me](http://sifo.me) website will be done in the folder /var/www/production. You can test it as reference. The output looks more or less like this:
 
+	$ bash deploy.sh 
+	Loading composer repositories with package information
+	Installing dependencies (including require-dev) from lock file
+	Nothing to install or update
+	Generating autoload files
+	Author name? <artomb>:
+	Branch? <master>:
+	Revision? <fa938355be>:
+	HEAD is now at fa93835 Minor update on documentation
+	Already on 'master'
+	Your branch is up-to-date with 'origin/master'.
+	From https://github.com/sifophp/sifo-app
+	 * branch            master     -> FETCH_HEAD
+	Already up-to-date.
+	Loading composer repositories with package information
+	Installing dependencies (including require-dev)                                      
+	  - Installing sifophp/sifo-instance-installer (v0.3.0)
+	    Loading from cache
+	
+	  - Installing sifophp/sifo-common-instance (dev-master 4c1ec82)
+	    Cloning 4c1ec826f65cb5bedad923f958948db4ced5014a
+	
+	  - Installing sifophp/sifo (v3.0.0-beta.1)
+	    Cloning 9681062c08dde9f1b4ca90af4f5b3ca13efb3426
+	
+	  - Installing sifophp/sifoweb (dev-master 872c9a8)
+	    Cloning 872c9a89c3c90d02f22eb3df84e3f4cd8460d7db
+	
+	Writing lock file
+	Generating autoload files
+	Already on 'master'
+	Your branch is up-to-date with 'origin/master'.
+	Note: checking out 'fa938355be'.
+	
+	You are in 'detached HEAD' state. You can look around, make experimental
+	changes and commit them, and you can discard any commits you make in this
+	state without impacting any branches by performing another checkout.
+	
+	If you want to create a new branch to retain commits you create, you may
+	do so (now or later) by using -b with the checkout command again. Example:
+	
+	  git checkout -b new_branch_name
+	
+	HEAD is now at fa93835... Minor update on documentation
 
+After deploying the structure looks like this:
+$ ls -l /var/www/
+total 8
+drwxr-xr-x  2 alombarte  staff   68 Nov 12 00:31 deploys
+lrwxr-xr-x  1 alombarte  staff   45 Nov 12 01:08 production -> /Users/artomb/deploy_test/releases/fa938355be
+drwxr-xr-x  5 alombarte  staff  170 Nov 12 01:08 releases
 
 ## How does it work?
 In a nutshell, the script will prepare a new folder containing the release (sha-1) you want to deploy. When everything is set the production path (which happens to be a symbolic link) will be changed and pointed to the new folder. If you added anything to the `post-deploy.sh` then it will be executed.
@@ -74,6 +137,7 @@ With the skeleton folder having all the code as expected, the whole folder is co
 
  - Many :)
  - Unexpected behavior and error control
+ - You cannot deploy if you haven't cloned the project for the first time.
  - Cleanup old releases from the releases directory (free space)
  - Multiple machine deploy has to be done using other tools. 
 
