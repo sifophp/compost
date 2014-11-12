@@ -30,7 +30,8 @@ If you don't have composer or similar installed, now is the moment. Composer wor
 
 	
 ## Usage
-Just call the script :)
+
+Just call the script, it is interactive and will offer to deploy to the latest revision found in the origin (remote connection needed). You can specify any other branch and revision at your will.
 
 **Deploy to the latest version of current branch**
 
@@ -52,14 +53,14 @@ To run the script in debug mode and see every line what is doing type:
 
 	bash -x deploy.sh
 	
-If you don't make any changes to this script, the deployment of the [SIFO.me](http://sifo.me) website will be done in the folder /var/www/production. You can test it as reference. The output looks more or less like this:
+If you don't make any changes to this script, the deployment of the [SIFO.me](http://sifo.me) website will be done in the folder /var/www/production. You can test it as reference. The full output could look more or less like this:
 
 	$ bash deploy.sh 
 	Loading composer repositories with package information
 	Installing dependencies (including require-dev) from lock file
 	Nothing to install or update
 	Generating autoload files
-	Author name? <artomb>:
+	Author name? <alombarte>:
 	Branch? <master>:
 	Revision? <fa938355be>:
 	HEAD is now at fa93835 Minor update on documentation
@@ -98,24 +99,27 @@ If you don't make any changes to this script, the deployment of the [SIFO.me](ht
 	  git checkout -b new_branch_name
 	
 	HEAD is now at fa93835... Minor update on documentation
+	
+	Deployment finished! Using /var/www/releases/fa938355be as production folder
+After deploying the folder structure looks like this:
 
-After deploying the structure looks like this:
-$ ls -l /var/www/
-total 8
-drwxr-xr-x  2 alombarte  staff   68 Nov 12 00:31 deploys
-lrwxr-xr-x  1 alombarte  staff   45 Nov 12 01:08 production -> /Users/artomb/deploy_test/releases/fa938355be
-drwxr-xr-x  5 alombarte  staff  170 Nov 12 01:08 releases
+	$ ls -l /var/www/
+	total 8
+	drwxr-xr-x  2 alombarte  staff   68 Nov 12 00:31 deploys
+	lrwxr-xr-x  1 alombarte  staff   45 Nov 12 01:08 production -> /Users/artomb/deploy_test/releases/fa938355be
+	drwxr-xr-x  5 alombarte  staff  170 Nov 12 01:08 releases
+
 
 ## How does it work?
 In a nutshell, the script will prepare a new folder containing the release (sha-1) you want to deploy. When everything is set the production path (which happens to be a symbolic link) will be changed and pointed to the new folder. If you added anything to the `post-deploy.sh` then it will be executed.
 
 If a release has been already deployed in the past if you intend to deploy it again (e.g `rollback`) then only the symbolic link will be changed, because everything else is already there. The `post-deploy.sh` will be executed anyway (I left it this way in case you need to clean stuff).
 
-A more graphical example, let's imagine you have your application under
+A more graphical example, let's imagine you have you installed your application (`APP_DIR`) under:
 
 	/var/www/myapplication
 	
-Remember `myapplication` is a symbolic link to a folder. And then you want to deploy your code to the latest revision in the master branch (no arguments), then you would execute:
+And then you want to deploy your code to the latest revision in the current branch, then you would execute:
 
 	/path/to/deploy.sh
 	
@@ -136,7 +140,8 @@ With the skeleton folder having all the code as expected, the whole folder is co
 ## Things not covered
 
  - Many :)
- - Unexpected behavior and error control
+ - Unexpected behavior is not controlled.
+ - No checks, just executes as a monkey (OMG!)
  - You cannot deploy if you haven't cloned the project for the first time.
  - Cleanup old releases from the releases directory (free space)
  - Multiple machine deploy has to be done using other tools. 
