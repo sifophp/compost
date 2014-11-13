@@ -42,7 +42,7 @@ APP_BASE_DIR_REMOTE_REV=`git ls-remote origin $APP_BRANCH | sed 's/\([0-9a-f]\{1
 APP_BASE_DIR_LOCAL_REV=`git rev-parse refs/heads/$APP_BRANCH | sed 's/\([0-9a-f]\{10\}\)\(.*\)/\1/g'`
 
 # INTERACTIVE SHELL
-echo "Author name? <$USER>:"
+echo "Author name? <$USER>: "
 read AUTHOR
 echo "Branch? <$APP_BRANCH>:"
 read BRANCH
@@ -88,7 +88,15 @@ if [ ! -d $RELEASE ] ; then
 fi
 
 # Deploy it
-echo "Deploying $RELEASE..." | tee -a $DEPLOY_LOG	
+echo "Ready to deploy $RELEASE..." | tee -a $DEPLOY_LOG
+echo "If anything failed it's time to abort now (Ctrl+C)"
+read -p "Continue? [y/N]: " CONTINUE
+tput cuu1
+if [ "$CONTINUE" != "y" ] ; then
+	echo "DEPLOYMENT ABORTED ON USER REQUEST" | tee -a $DEPLOY_LOG
+	exit 1
+fi
+
 rm $APP_DIR && ln -s $RELEASE $APP_DIR
 
 echo "Executing post-deploy scripts..." | tee -a $DEPLOY_LOG	
@@ -97,3 +105,4 @@ source $SCRIPTPATH/post-deploy.sh | tee -a $DEPLOY_LOG
 
 echo "Log file in $DEPLOY_LOG"	
 cd $ORIGINAL_PATH
+exit 0
