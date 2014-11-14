@@ -11,17 +11,17 @@ TODAY=$(date "+%Y-%b-%d")
 ORIGINAL_PATH=$PWD
 DEPLOY_LOG="$DEPLOY_LOGS_DIR/$TODAY.log"
 
-echo "Deploy started on $TODAY..." | tee -a $DEPLOY_LOG	
-echo "Checking requisites..." | tee -a $DEPLOY_LOG	
-# REQUISITES CHECKING
-# -------------------
-command -v $DEPENDENCY_BIN >/dev/null 2>&1 || { echo >&2 "Command '$DEPENDENCY_BIN' is not installed. Failed miserably :_(" | tee -a $DEPLOY_LOG; exit 1; }
-
 # Create all dirs
 mkdir -p "$APP_DIR"
 mkdir -p "$RELEASES_DIR"
 mkdir -p "$RELEASES_SKELETON_DIR"
 mkdir -p "$DEPLOY_LOGS_DIR"
+
+echo "Deploy started on $TODAY..." | tee -a $DEPLOY_LOG	
+echo "Checking requisites..." | tee -a $DEPLOY_LOG	
+# REQUISITES CHECKING
+# -------------------
+command -v $DEPENDENCY_BIN >/dev/null 2>&1 || { echo >&2 "Command '$DEPENDENCY_BIN' is not installed. Failed miserably :_(" | tee -a $DEPLOY_LOG; exit 1; }
 
 # First-time only. Clone the whole thing and composer update.
 if [ ! -d $RELEASES_SKELETON_DIR/.git ]; then
