@@ -12,7 +12,10 @@ ORIGINAL_PATH=$PWD
 DEPLOY_LOG="$DEPLOY_LOGS_DIR/$TODAY.log"
 
 # Create all dirs
-mkdir -p "$APP_DIR"
+APP_DIR_SYMLINK_CONTAINER=$(dirname "$APP_DIR_SYMLINK")
+if [ ! -d $APP_DIR_SYMLINK_CONTAINER ]; then
+	mkdir -p "$APP_DIR_SYMLINK_CONTAINER"
+fi
 mkdir -p "$RELEASES_DIR"
 mkdir -p "$RELEASES_SKELETON_DIR"
 mkdir -p "$DEPLOY_LOGS_DIR"
@@ -29,34 +32,41 @@ if [ ! -d $RELEASES_SKELETON_DIR/.git ]; then
 	git clone $GIT_REPO $RELEASES_SKELETON_DIR
 	cd $RELEASES_SKELETON_DIR
 	$DEPENDENCY_BIN install	
+	ln -s $RELEASES_SKELETON_DIR $APP_DIR_SYMLINK
 fi
 
 # DEPLOYMENT START
 # ----------------
 # CURRENT APP STATUS
-cd $APP_DIR
-APP_BRANCH=$(git branch | awk '/^\*/ { print $2 }')
-# REMOTE STATUS
-echo "Getting remote git information..." | tee -a $DEPLOY_LOG	
-APP_BASE_DIR_REMOTE_REV=`git ls-remote origin $APP_BRANCH | sed 's/\([0-9a-f]\{10\}\)\(.*\)/\1/g' | head -n 1`
-APP_BASE_DIR_LOCAL_REV=`git rev-parse refs/heads/$APP_BRANCH | sed 's/\([0-9a-f]\{10\}\)\(.*\)/\1/g'`
+cd $APP_DIR_SYMLINK
+APP_BRANCH=$DEFAULT_DEPLOY_BRANCH
 
 # INTERACTIVE SHELL
-echo "Author name? <$USER>: "
-read AUTHOR
-echo "Branch? <$APP_BRANCH>:"
+echo "Deploy data. Press ENTER to accept default values."
+echo "Which Branch? <$APP_BRANCH>:"
 read BRANCH
-echo "Revision? <$APP_BASE_DIR_REMOTE_REV>:"
-read REVISION
-
 if [ "$BRANCH" == "" ] ; then
 	BRANCH=$APP_BRANCH
 fi
-if [ "$AUTHOR" == "" ] ; then
-	AUTHOR=$USER
+echo "Retrieving latest SHA from remote repository..." | tee -a $DEPLOY_LOG	
+APP_BASE_DIR_REMOTE_REV=`git ls-remote origin $BRANCH | sed 's/\([0-9a-f]\{10\}\)\(.*\)/\1/g' | head -n 1`
+
+if [ "$APP_BASE_DIR_REMOTE_REV" == "" ] ; then
+		echo "Failed retrieving remote content for branch '$BRANCH'" | tee -a $DEPLOY_LOG
+		exit 1
 fi
+echo "Target <$APP_BASE_DIR_REMOTE_REV>?:"
+read REVISION
 if [ "$REVISION" == "" ] ; then
 	REVISION=$APP_BASE_DIR_REMOTE_REV
+fi
+
+# Current revision:
+APP_BASE_DIR_LOCAL_REV=`git rev-parse --verify HEAD | sed 's/\([0-9a-f]\{10\}\)\(.*\)/\1/g'`
+
+if [ "$REVISION" == "$APP_BASE_DIR_LOCAL_REV" ] ; then
+	echo "Already at requested revision $APP_BASE_DIR_LOCAL_REV, nothing to do." | tee -a $DEPLOY_LOG
+	exit 1
 fi
 
 RELEASE="$RELEASES_DIR/$REVISION"
@@ -97,7 +107,7 @@ if [ "$CONTINUE" != "y" ] ; then
 	exit 1
 fi
 
-rm $APP_DIR && ln -s $RELEASE $APP_DIR
+rm $APP_DIR_SYMLINK && ln -s $RELEASE $APP_DIR_SYMLINK
 
 echo "Executing post-deploy scripts..." | tee -a $DEPLOY_LOG	
 # Execute post-deployment actions

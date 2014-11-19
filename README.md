@@ -11,17 +11,10 @@ This is a ridiculous simple script that will download the source code of your pr
  - A remotely cloned git repo where the production path points to.
 
 ## Installation
- - Download this source code into your production server.
+ - Download this source code into your production server. Ensure `$APP_DIR_SYMLINK` doesn't exist yet.
  - Edit the `deploy.cfg` with your project settings
- - Clone the project and create a symlink in the APP_DIR: 
+ - After you have deployed for the first time, change your DocumentRoot to point to `$APP_DIR_SYMLINK`
 
-Copy and paste with the final `deploy.cfg`:
-
-	source deploy.cfg
-	git clone $GIT_REPO $RELEASES_SKELETON_DIR
-	ln -s $RELEASES_SKELETON_DIR $APP_DIR
-	
-You should not serve in production this folder yet, since is pointing to the "skeleton" and that's only a temporary state until you deploy for the first time.
 
 ### Dependency management
 If you don't have composer or similar installed, now is the moment. Composer works like this:
@@ -45,7 +38,7 @@ And accept all dialogues.
 
 	bash deploy.sh
 	
-If you need to do specific things **after** the deploy then put them in the file `post-deploy.sh`.
+Then write the branch you want to use and the SHA commit you want to checkout.
 
 *NOTE:* Depending on the needed permissions you might need to run the script using `sudo`:
 
@@ -54,23 +47,37 @@ If you need to do specific things **after** the deploy then put them in the file
 To run the script in debug mode and see every line what is doing type:
 
 	bash -x deploy.sh
-	
+
+You can see the list of revisions you can deploy to by executing a `git log`
+### Script Output
+
 If you don't make any changes to this script, the deployment of the [SIFO.me](http://sifo.me) website will be done in the folder /var/www/production. You can test it as reference. The full output could look more or less like this:
 
 	$ bash deploy.sh 
-	Loading composer repositories with package information
-	Installing dependencies (including require-dev) from lock file
-	Nothing to install or update
-	Generating autoload files
-	Author name? <alombarte>:
-	Branch? <master>:
-	Revision? <fa938355be>:
-	HEAD is now at fa93835 Minor update on documentation
-	Already on 'master'
+	Deploy started on 2014-Nov-20...
+	Checking requisites...
+	Deploy data. Press ENTER to accept default values.
+	Which Branch? <master>:
+
+	Retrieving latest SHA from remote repository...
+	Target <fa938355be>?:
+
+	********************SUMMARY********************
+	From revision:  a5263b8473
+	To revision:    fa938355be
+	BRANCH: master
+	************************************************
+	Preparing release...
+	Cleaning skeleton...
+	HEAD is now at a5263b8 Update README.md
+	Previous HEAD position was a5263b8... Update README.md
+	Switched to branch 'master'
 	Your branch is up-to-date with 'origin/master'.
+	Pulling remote changes...
 	From https://github.com/sifophp/sifo-app
 	 * branch            master     -> FETCH_HEAD
 	Already up-to-date.
+	Installing dependencies with '/usr/bin/composer install'...
 	Loading composer repositories with package information
 	Installing dependencies (including require-dev)                                      
 	  - Installing sifophp/sifo-instance-installer (v0.3.0)
@@ -86,23 +93,48 @@ If you don't make any changes to this script, the deployment of the [SIFO.me](ht
 	    Cloning 872c9a89c3c90d02f22eb3df84e3f4cd8460d7db
 	
 	Writing lock file
+	Installing dependencies (including require-dev) from lock file
+	Nothing to install or update
+	
 	Generating autoload files
 	Already on 'master'
 	Your branch is up-to-date with 'origin/master'.
 	Note: checking out 'fa938355be'.
-	
+
 	You are in 'detached HEAD' state. You can look around, make experimental
 	changes and commit them, and you can discard any commits you make in this
 	state without impacting any branches by performing another checkout.
-	
+
 	If you want to create a new branch to retain commits you create, you may
 	do so (now or later) by using -b with the checkout command again. Example:
-	
+
 	  git checkout -b new_branch_name
-	
+
 	HEAD is now at fa93835... Minor update on documentation
-	
+	Creating release folder...
+	Ready to deploy /var/www/releases/fa938355be...
+	If anything failed it's time to abort now (Ctrl+C)
+	Continue? [y/N]: y
+	Executing post-deploy scripts...
 	Deployment finished! Using /var/www/releases/fa938355be as production folder
+	Log file in /var/www/deploys/2014-Nov-20.log
+
+If you deploy the same revision this is what you get:
+
+	$ bash deploy.sh 
+	Deploy started on 2014-Nov-20...
+	Checking requisites...
+	Deploy data. Press ENTER to accept default values.
+	Which Branch? <master>:
+
+	Retrieving latest SHA from remote repository...
+
+	Target <fa938355be>?:
+	Already at requested revision fa938355be, nothing to do.
+	
+
+### Post-deploy
+If you need to do specific things **after** the deploy then put them in the file `post-deploy.sh`.
 
 
 ## How does it work?
@@ -110,7 +142,7 @@ In a nutshell, the script will prepare a new folder containing the release (sha-
 
 If a release has been already deployed in the past if you intend to deploy it again (e.g `rollback`) then only the symbolic link will be changed, because everything else is already there. The `post-deploy.sh` will be executed anyway (I left it this way in case you need to clean stuff).
 
-A more graphical example, let's imagine you have you installed your application (`APP_DIR`) under:
+A more graphical example, let's imagine you have you installed your application (`APP_DIR_SYMLINK`) under:
 
 	/var/www/myapp
 	
