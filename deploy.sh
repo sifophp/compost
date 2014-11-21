@@ -80,25 +80,27 @@ echo "************************************************" | tee -a $DEPLOY_LOG
 
 # If release doesn't exist yet, prepare it:
 if [ ! -d $RELEASE ] ; then
-	echo "Preparing release..." | tee -a $DEPLOY_LOG	
-	echo "Cleaning skeleton..." | tee -a $DEPLOY_LOG	
+	echo "-- Preparing release..." | tee -a $DEPLOY_LOG	
+	echo "-- Cleaning skeleton..." | tee -a $DEPLOY_LOG	
 	cd $RELEASES_SKELETON_DIR 2>&1 | tee -a $DEPLOY_LOG
 	# Skeleton should be always clean, but anyway let's assure.
 	git reset --hard 2>&1 | tee -a $DEPLOY_LOG
 	git checkout master 2>&1 | tee -a $DEPLOY_LOG
-	echo "Pulling remote changes..." | tee -a $DEPLOY_LOG	
-	git pull origin $APP_BRANCH 2>&1 | tee -a $DEPLOY_LOG
-	echo "Installing dependencies with '$DEPENDENCY_BIN $DEPENDENCY_BIN_ARGS'..." | tee -a $DEPLOY_LOG	
+	echo "-- Pulling remote changes..." | tee -a $DEPLOY_LOG	
+	git pull 2>&1 | tee -a $DEPLOY_LOG
+	echo "-- Installing dependencies with '$DEPENDENCY_BIN $DEPENDENCY_BIN_ARGS'..." | tee -a $DEPLOY_LOG	
 	$DEPENDENCY_BIN $DEPENDENCY_BIN_ARGS 2>&1 | tee -a $DEPLOY_LOG
+	echo "-- Checking out $BRANCH'..." | tee -a $DEPLOY_LOG	
 	git checkout $BRANCH 2>&1 | tee -a $DEPLOY_LOG
+	echo "-- Selecting $REVISION'..." | tee -a $DEPLOY_LOG	
 	git checkout $REVISION 2>&1 | tee -a $DEPLOY_LOG
 
-	echo "Creating release folder..." | tee -a $DEPLOY_LOG	
+	echo "-- Creating release folder..." | tee -a $DEPLOY_LOG	
 	cp -R $RELEASES_SKELETON_DIR $RELEASE
 fi
 
 # Deploy it
-echo "Ready to deploy $RELEASE..." | tee -a $DEPLOY_LOG
+echo "-- Ready to deploy $RELEASE..." | tee -a $DEPLOY_LOG
 echo "If anything failed it's time to abort now (Ctrl+C)"
 read -p "Continue? [y/N]: " CONTINUE
 tput cuu1
@@ -109,10 +111,10 @@ fi
 
 rm $APP_DIR_SYMLINK && ln -s $RELEASE $APP_DIR_SYMLINK
 
-echo "Executing post-deploy scripts..." | tee -a $DEPLOY_LOG	
+echo "-- Executing post-deploy scripts..." | tee -a $DEPLOY_LOG	
 # Execute post-deployment actions
 source $SCRIPTPATH/post-deploy.sh | tee -a $DEPLOY_LOG
 
-echo "Log file in $DEPLOY_LOG"	
+echo "-- Log file in $DEPLOY_LOG"	
 cd $ORIGINAL_PATH
 exit 0
