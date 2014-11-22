@@ -88,12 +88,13 @@ if [ ! -d $RELEASE ] ; then
 	git checkout master 2>&1 | tee -a $DEPLOY_LOG
 	echo "-- Pulling remote changes..." | tee -a $DEPLOY_LOG	
 	git pull 2>&1 | tee -a $DEPLOY_LOG
-	echo "-- Installing dependencies with '$DEPENDENCY_BIN $DEPENDENCY_BIN_ARGS'..." | tee -a $DEPLOY_LOG	
-	$DEPENDENCY_BIN $DEPENDENCY_BIN_ARGS 2>&1 | tee -a $DEPLOY_LOG
 	echo "-- Checking out $BRANCH'..." | tee -a $DEPLOY_LOG	
 	git checkout $BRANCH 2>&1 | tee -a $DEPLOY_LOG
 	echo "-- Selecting $REVISION'..." | tee -a $DEPLOY_LOG	
 	git checkout $REVISION 2>&1 | tee -a $DEPLOY_LOG
+	echo "-- Installing dependencies with '$DEPENDENCY_BIN $DEPENDENCY_BIN_ARGS'..." | tee -a $DEPLOY_LOG	
+	$DEPENDENCY_BIN $DEPENDENCY_BIN_ARGS 2>&1 | tee -a $DEPLOY_LOG
+	
 
 	echo "-- Creating release folder..." | tee -a $DEPLOY_LOG	
 	cp -R $RELEASES_SKELETON_DIR $RELEASE
