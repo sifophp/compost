@@ -1,7 +1,15 @@
+
+	Better use Capistrano for your deployments, we also have a recipe ready:
+	https://github.com/sifophp/capistrano-deploy-php
+
+
+**The use of compost in production is not recommended, this is an experiment**
+
+
 # COMPOST: A bash deployment script with Composer installation
 This is a ridiculous simple script that will download the source code of your project from a git repository and deploy it in production resolving all its dependencies (using **composer** by default, but you can change the command to bower or anything else). The script is written in `bash` so you don't have to install anything in the server other than the tools you already use. 
 
-**DISCLAIMER: Very beta! Use with caution, I won't refund you the money if things go weird. I take no responsibility or whatsoever. Developed in one late afterwork night. My skills in Bash are so advanced as the ones of a Spanish prime minister related to rule a country. All being said, enjoy the masterpiece.**
+**DISCLAIMER: Very beta! Use with caution, I won't refund you the money if things go weird. I take no responsibility or whatsoever. Developed in one late afterwork night. My skills in Bash are so advanced as the ones of a Spanish prime minister related to rule a country and speak English. All being said, enjoy the masterpiece.**
 
 
 ## Requirements
