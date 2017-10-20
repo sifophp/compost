@@ -1,3 +1,4 @@
+Deprecated
 
 	Better use Capistrano for your deployments, we also have a recipe ready:
 	https://github.com/sifophp/capistrano-deploy-php
